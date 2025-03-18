@@ -6,3 +6,5 @@ data_test/
 __init__**
 
 **.pyc
+**.csv
+**.h5

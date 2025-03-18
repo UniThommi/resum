@@ -130,7 +130,7 @@ def convert_all_csv_to_hdf5(config_file):
                 # Call the function for single file conversion
                 convert_single_csv_to_hdf5(csv_file, hdf5_file, theta_headers, target_label, weights_labels)
 
-def read_selected_indices(hdf5_file, label_dict):
+def read_selected_indices(hdf5_file, label_dict): #FIX: Für keine Theta.
         """
         Gives back indices of only the specified columns from parameter_key inHDF5 file.
         label_dict is a dictionary with following structure {'key': "...",'label_key': "....",'selected_labels': ["radius","thickness",...]}

@@ -89,7 +89,7 @@ class HDF5Dataset(IterableDataset):
                 
                 if i == 0  and self.epoch_counter==0:
                     self.phi_selected_indices=utils.read_selected_indices(self.files[0],self.parameters['phi'])
-                    self.theta_selected_indices=utils.read_selected_indices(self.files[0],self.parameters['theta'])
+                    self.theta_selected_indices=utils.read_selected_indices(self.files[0],self.parameters['theta']) # FIX: Für keine Thetas
                     self.target_selected_indices=utils.read_selected_indices(self.files[0],self.parameters['target'])
 
                 batch = []
