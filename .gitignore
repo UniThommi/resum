@@ -1,2 +1,8 @@
 dist/
 resum.egg-info/
+
+data_test/
+
+__init__**
+
+**.pyc
