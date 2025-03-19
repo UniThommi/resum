@@ -15,7 +15,7 @@ cnp_settings:
 
 simulation_settings:
   theta_headers: []
-  phi_labels: ["evtid","nC_x","nC_y","nC_z","nC_material","nC_global_time","nC_gamma_amount","nC_gamma_total_energy"]
+  phi_labels: ["nC_x","nC_y","nC_z","nC_material","nC_global_time","nC_gamma_amount","nC_gamma_total_energy"]
   target_label: ["nC_detected"]
   signal_condition: ["nC_detected==1"]
   weights_labels: []
