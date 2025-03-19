@@ -103,10 +103,15 @@ class HDF5Dataset(IterableDataset):
                     with h5py.File(file, "r") as hdf:
                         phi=hdf[self.parameters['phi']['key']][start_idx:end_idx, self.phi_selected_indices]
                         if  len(hdf[self.parameters['theta']['key']][:].shape) == 1:
-                            theta = hdf[self.parameters['theta']['key']][self.theta_selected_indices]
-                            theta = np.tile(theta, (phi.shape[0], 1))
+                            if self.theta_selected_indices:
+                                theta = hdf[self.parameters['theta']['key']][self.theta_selected_indices]
+                                theta = np.tile(theta, (phi.shape[0], 1))
+                            else:
+                                # If theta_selected_indices is empty, handle the case with a fallback behavior
+                                theta = np.zeros((phi.shape[0], 0))
                         else:
                             theta = hdf[self.parameters['theta']['key']][start_idx:end_idx, self.theta_selected_indices]
+                            
                         features = np.hstack([theta, phi])
 
                         if np.ndim(hdf[self.parameters['target']['key']]) > 1:
