@@ -1,2 +1,7 @@
 dist/
 resum.egg-info/
+
+**.csv
+**.h5
+**.pyc
+**.zip
