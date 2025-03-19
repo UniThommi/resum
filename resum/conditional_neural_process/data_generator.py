@@ -89,8 +89,12 @@ class HDF5Dataset(IterableDataset):
                 
                 if i == 0  and self.epoch_counter==0:
                     self.phi_selected_indices=utils.read_selected_indices(self.files[0],self.parameters['phi'])
-                    self.theta_selected_indices=utils.read_selected_indices(self.files[0],self.parameters['theta']) # FIX: Für keine Thetas
-                    self.target_selected_indices=utils.read_selected_indices(self.files[0],self.parameters['target'])
+                    if len(self.parameters['theta']['selected_labels'])> 0:
+                        self.theta_selected_indices=utils.read_selected_indices(self.files[0],self.parameters['theta'])
+                    if len(self.parameters['target']['selected_labels'])> 0:
+                        self.target_selected_indices=utils.read_selected_indices(self.files[0],self.parameters['target'])
+                    else:
+                        self.target_selected_indices = 0
 
                 batch = []
                 selected_files = self.files[i:i + self.files_per_batch]
@@ -102,17 +106,15 @@ class HDF5Dataset(IterableDataset):
                 for j, file in enumerate(selected_files):
                     with h5py.File(file, "r") as hdf:
                         phi=hdf[self.parameters['phi']['key']][start_idx:end_idx, self.phi_selected_indices]
-                        if  len(hdf[self.parameters['theta']['key']][:].shape) == 1:
-                            if self.theta_selected_indices:
+                        if self.theta_selected_indices != None:
+                            if  len(hdf[self.parameters['theta']['key']][:].shape) == 1:
                                 theta = hdf[self.parameters['theta']['key']][self.theta_selected_indices]
                                 theta = np.tile(theta, (phi.shape[0], 1))
                             else:
-                                # If theta_selected_indices is empty, handle the case with a fallback behavior
-                                theta = np.zeros((phi.shape[0], 0))
+                                theta = hdf[self.parameters['theta']['key']][start_idx:end_idx, self.theta_selected_indices]
+                            features = np.hstack([theta, phi])
                         else:
-                            theta = hdf[self.parameters['theta']['key']][start_idx:end_idx, self.theta_selected_indices]
-                            
-                        features = np.hstack([theta, phi])
+                            features = phi
 
                         if np.ndim(hdf[self.parameters['target']['key']]) > 1:
                             target=hdf[self.parameters['target']['key']][start_idx:end_idx, self.target_selected_indices]
