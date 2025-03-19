@@ -130,7 +130,7 @@ def convert_all_csv_to_hdf5(config_file):
                 # Call the function for single file conversion
                 convert_single_csv_to_hdf5(csv_file, hdf5_file, theta_headers, target_label, weights_labels)
 
-def read_selected_indices(hdf5_file, label_dict): #FIX: Für keine Theta.
+def read_selected_indices(hdf5_file, label_dict):
         """
         Gives back indices of only the specified columns from parameter_key inHDF5 file.
         label_dict is a dictionary with following structure {'key': "...",'label_key': "....",'selected_labels': ["radius","thickness",...]}
@@ -148,7 +148,7 @@ def read_selected_indices(hdf5_file, label_dict): #FIX: Für keine Theta.
                 selected_indices = [labels.index(label) for label in selected_labels if label in labels]
 
             if not selected_indices:
-                raise ValueError(f"None of the requested labels {selected_labels} exist in phi_labels!")
+                raise ValueError(f"None of the requested labels {selected_labels} exist in {label_dict['key']}!")
             return sorted(selected_indices)
 
 def get_all_signal_events(filename_base, nrows):
