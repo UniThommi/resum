@@ -127,14 +127,13 @@ class HDF5Dataset(IterableDataset):
 
                         # Stack rows from this file
                         file_data = np.hstack([features, target])
-
                         batch.extend(file_data.tolist())
-
                         used_rows += len(file_data)
                 # end loop over single file
                 # Yield batch of batch-size shuffled samples
                 random.shuffle(batch)
                 yield torch.tensor(batch, dtype=torch.float32)
+
                 self.total_batches += 1
             # end loop over file chunk
             cycle_idx += 1
@@ -146,7 +145,7 @@ class HDF5Dataset(IterableDataset):
 
             # If all files and rows (from k*i to k*(i+1)) are read, reshuffle files for the row block
             if self.epoch_counter >= self.total_cycles_per_epoch:
-                print("Finished full dataset pass. Starting new epoch! ",self.epoch_counter)
+                print("Finished full dataset pass. Starting new epoch! ")
                 self.shuffle_files()
                 break
 
@@ -177,6 +176,7 @@ class DataGeneration(object):
         _names_theta=config_file["simulation_settings"]["theta_headers"]
         _names_phi=config_file["simulation_settings"]["phi_labels"]
         self._names_target =config_file["simulation_settings"]["target_label"]
+        self.feature_size,self.target_size=utils.get_feature_and_label_size(config_file)
         
         if not any(f.endswith(".h5") for f in os.listdir(path_to_files)):
             utils.convert_all_csv_to_hdf5(config_file)
@@ -318,18 +318,19 @@ class DataGeneration(object):
         Returns:
         - CNPRegressionDescription(query=((batch_context_x, batch_context_y), batch_target_x), target_y=batch_target_y)
         """
+
         batch_size = batch.shape[0]  # Actual batch size (may be < 3000)
         
         # Dynamically compute num_context and num_target
         num_context = int(batch_size * self._context_ratio)
         num_target = batch_size - num_context  # Ensure it sums to batch_size
-
+        
         # Shuffle the batch to ensure randomness
         batch = batch[torch.randperm(batch.shape[0])]
-
+        
         # Split batch into input (X) and target (Y) features
-        batch_x = batch[:, :-1]  # All features except last column (input features)
-        batch_y = batch[:, -1]   # Last column is the target (output values)
+        batch_x = batch[:,:self.feature_size]  # All features except last column (input features)
+        batch_y = batch[:,self.feature_size:self.feature_size+self.target_size]   # Last column is the target (output values)
 
         if context_is_subset:
             # **Context is taken as the first num_context points from target**
@@ -348,7 +349,7 @@ class DataGeneration(object):
         # Ensure y tensors have correct dimensions (convert from 1D to 2D if needed)
         batch_context_y = batch_context_y.view(-1, 1) if batch_context_y.ndim == 1 else batch_context_y
         batch_target_y = batch_target_y.view(-1, 1) if batch_target_y.ndim == 1 else batch_target_y
-
+        
         if batch_context_x.dim() == 2:  # Convert from [N, D] → [1, N, D]
             batch_context_x = batch_context_x.unsqueeze(0)
         if batch_context_y.dim() == 2:  # Convert from [N, 1] → [1, N, 1]
@@ -360,7 +361,7 @@ class DataGeneration(object):
             batch_target_y = batch_target_y.unsqueeze(0)
         # Construct the query tuple
         query = ((batch_context_x, batch_context_y), batch_target_x)
-
+        
         # Return the properly formatted object
         return CNPRegressionDescription(query=query, target_y=batch_target_y)
 

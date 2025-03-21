@@ -27,8 +27,7 @@ f_out = config_file["path_settings"]["f_out"]
 
 x_size, y_size = utils.get_feature_and_label_size(config_file)
 
-
-d_x, d_in, representation_size, d_out = x_size , x_size+y_size, 32, y_size+1
+d_x, d_in, representation_size, d_out = x_size , x_size+y_size, 32, y_size*2
 encoder_sizes = [d_in, 32, 64, 128, 128, 128, 64, 48, representation_size]
 decoder_sizes = [representation_size + d_x, 32, 64, 128, 128, 128, 64, 48, d_out]
 
@@ -57,11 +56,11 @@ for it_epoch in range(TRAINING_EPOCHS):
     data_iter = iter(dataloader_test)
     it_batch = 0
 
-    for batch in dataloader_train:
+    for b, batch in enumerate(dataloader_train):
         batch_formated=dataset_train.format_batch_for_cnp(batch,config_file["cnp_settings"]["context_is_subset"] )
         # Get the predicted mean and variance at the target points for the testing set
         log_prob, mu, _ = model(batch_formated.query, batch_formated.target_y)
-    
+        
         # Define the loss
         loss = -log_prob.mean()
         loss.backward()
@@ -71,29 +70,31 @@ for it_epoch in range(TRAINING_EPOCHS):
     
         # reset gradient to 0 on all parameters
         optimizer.zero_grad()
-
-        if max(mu[0].detach().numpy()) <= 1 and min(mu[0].detach().numpy()) >= 0:
-            loss_bce = bce(mu, batch_formated.target_y)
-        else:
-            loss_bce = -1.
-
+        
+        #if max(mu[0].detach().numpy()) <= 1 and min(mu[0].detach().numpy()) >= 0:
+        loss_bce = bce(mu, batch_formated.target_y)
+        #else:
+        #    loss_bce = -1.
+        
         mu=mu[0].detach().numpy()
+        
         if it_batch % 50 == 0:
             print('{} Iteration: {}/{}, train loss: {:.4f} (vs BCE {:.4f})'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),it_epoch, it_batch,loss, loss_bce))
             batch_testing = next(data_iter)
             batch_formated_test=dataset_train.format_batch_for_cnp(batch_testing,config_file["cnp_settings"]["context_is_subset"] )
+            
             log_prob_testing, mu_testing, _ = model(batch_formated_test.query, batch_formated_test.target_y)
             loss_testing = -log_prob_testing.mean()
             test_idx+=1
 
-            if max(mu_testing[0].detach().numpy()) <= 1 and min(mu_testing[0].detach().numpy()) >= 0:
-                loss_bce_testing = bce(mu_testing,  batch_formated_test.target_y)
-            else:
-                loss_bce_testing = -1.
+            #if max(mu_testing[0].detach().numpy()) <= 1 and min(mu_testing[0].detach().numpy()) >= 0:
+            loss_bce_testing = bce(mu_testing,  batch_formated_test.target_y)
+            #else:
+            #    loss_bce_testing = -1.
 
             mu_testing=mu_testing[0].detach().numpy()
             print("{}, Iteration: {}, test loss: {:.4f} (vs BCE {:.4f})".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), it_batch, loss_testing, loss_bce_testing))
-            if isinstance(name_y,str):
+            if y_size ==1:
                 fig = plotting.plot(mu, batch_formated_test.target_y[0].detach().numpy(), f'{loss:.2f}', mu_testing, batch_formated_test.target_y[0].detach().numpy(), f'{loss_testing:.2f}', it_batch)
             else:
                 for k in range(y_size):
