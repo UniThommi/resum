@@ -15,9 +15,9 @@ cnp_settings:
 
 simulation_settings:
   theta_headers: []
-  phi_labels: ["nC_x","nC_y","nC_z","nC_material","nC_global_time","nC_gamma_amount","nC_gamma_total_energy"]
-  target_label: ["nC_detected"]
-  signal_condition: ["nC_detected==1"]
+  phi_labels: ["nC_x_position_in_m","nC_y_position_in_m","nC_z_position_in_m","nC_material_id_of_N_creation","nC_global_time","nC_gamma_amount","nC_gamma_total_energy"]
+  target_label: columns[:3]   # Die Columns die für PMTs stehen
+  # signal_condition: ["nC_detected==1"]
   weights_labels: []
   y_raw_cnp: total_nC_Ge77[cts]
   y_raw_data_gen: nC_Ge77
@@ -28,9 +28,9 @@ simulation_settings:
   nsamples_hf: 10000000
 
 path_settings:
-  path_to_training_files: /home/tbueger/code/neuralNet/resum/examples/L1000NC/in/data/
-  path_to_test_files_lf: /home/tbueger/code/neuralNet/resum/examples/L1000NC/in/data/
-  path_to_test_files_hf:  /home/tbueger/code/neuralNet/resum/examples/L1000NC/in/data/
+  path_to_training_files: /global/homes/t/tbuerger/code/neuralNet/resum/examples/L1000NC/in/data
+  path_to_test_files_lf: /global/homes/t/tbuerger/code/neuralNet/resum/examples/L1000NC/in/data
+  path_to_test_files_hf:  /global/homes/t/tbuerger/code/neuralNet/resum/examples/L1000NC/in/data
   path_out:  ./out/cnp
   f_out: CNPGauss_v1.6_3540_c1000_t2000_beta_0.1_0.1
   path_to_model: ./out/cnp

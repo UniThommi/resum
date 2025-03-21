@@ -91,8 +91,11 @@ class HDF5Dataset(IterableDataset):
                     self.phi_selected_indices=utils.read_selected_indices(self.files[0],self.parameters['phi'])
                     if len(self.parameters['theta']['selected_labels'])> 0:
                         self.theta_selected_indices=utils.read_selected_indices(self.files[0],self.parameters['theta'])
-                    if len(self.parameters['target']['selected_labels'])> 0:
+                    if len(self.parameters['target']['selected_labels'])> 0 and "columns[" not in self.parameters['target']['selected_labels']:
                         self.target_selected_indices=utils.read_selected_indices(self.files[0],self.parameters['target'])
+                    elif len(self.parameters['target']['selected_labels'])> 0 and "columns[" in self.parameters['target']['selected_labels']:
+                        start, end = utils.parse_slice_string(self.parameters['target']['selected_labels'])
+                        self.target_selected_indices=[np.arange(start,end)]
                     else:
                         self.target_selected_indices = 0
 
@@ -315,7 +318,6 @@ class DataGeneration(object):
         Returns:
         - CNPRegressionDescription(query=((batch_context_x, batch_context_y), batch_target_x), target_y=batch_target_y)
         """
-
         batch_size = batch.shape[0]  # Actual batch size (may be < 3000)
         
         # Dynamically compute num_context and num_target

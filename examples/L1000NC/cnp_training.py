@@ -6,11 +6,12 @@ import datetime
 import numpy as np
 import os
 from resum.utilities import plotting_utils_cnp as plotting
+from resum.utilities import utilities as utils
 from resum.conditional_neural_process import DataGeneration
 from resum.conditional_neural_process import DeterministicModel
 import yaml
 
-with open("settings.yaml", "r") as f:
+with open("./settings.yaml", "r") as f:
     config_file = yaml.safe_load(f)
 
 TRAINING_EPOCHS = int(config_file["cnp_settings"]["training_epochs"]) # Total number of training points: training_iterations * batch_size * max_content_points
@@ -24,12 +25,8 @@ version_lf= config_file["simulation_settings"]["version_lf"]
 path_out = config_file["path_settings"]["path_out"]
 f_out = config_file["path_settings"]["f_out"]
 
-x_size = len(config_file["simulation_settings"]["theta_headers"]+config_file["simulation_settings"]["phi_labels"])
-name_y =config_file["simulation_settings"]["target_label"]
-if isinstance(name_y,str):
-    y_size = 1
-else:
-    y_size = len(name_y)
+x_size, y_size = utils.get_feature_and_label_size(config_file)
+
 
 d_x, d_in, representation_size, d_out = x_size , x_size+y_size, 32, y_size+1
 encoder_sizes = [d_in, 32, 64, 128, 128, 128, 64, 48, representation_size]
